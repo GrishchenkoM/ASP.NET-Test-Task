@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
+using System.Linq;
 using ListGeneration;
 using NUnit.Framework;
-
 
 namespace ListGenerationUnitTests
 {
@@ -12,10 +10,10 @@ namespace ListGenerationUnitTests
     {
         #region Setup/Release
 
-        [SetUp]
+        [SetUp, Description("Create instance of class which generate the list with random numbers")]
         public void GenerateRandomNumbersList()
         {
-            _quantity = 2;
+            _quantity = 10000;
             _randomList = new RandomList(_quantity);
             _list = _randomList.GetList;
         }
@@ -35,35 +33,45 @@ namespace ListGenerationUnitTests
         {
             Assert.IsNotEmpty(_list);
         }
-        [Test]
+        [Test, Description("Checks for coincidence of the size of the massif with a given size.")]
         public void IsCorrectLengthOfList()
         {
             Assert.AreEqual(_quantity, _list.Count);
         }
-        [Test]
+        [Test, MaxTime(2000), Description("Checks for uniqueness of array cells")]
         public void IsUniqueElementsOfList()
         {
-            //Assert.IsTrue(IsUniqueElementsInList(_list));
-            Assert.AreEqual(_list[0],_list[1]);
+            Assert.IsTrue(IsUniqueElementsInList(_list));
+        }
+        [Test, Description("Checks for coincidence of arrays after refreshing")]
+        public void IsCorrectRefreshOfList()
+        {
+            var randomList1 = new RandomList(_quantity);
+            var randomList2 = new RandomList(_quantity);
+            Assert.AreNotEqual(_randomList,randomList1);
+            Assert.AreNotEqual(randomList1, randomList2);
         }
 
         #endregion
 
         #region Methods
 
-        private bool IsUniqueElementsInList(List<int> list)
+        private static bool IsUniqueElementsInList(ICollection list)
         {
-            foreach (int element in list)
-                if (list.FindAll(x => x.Equals(element)).Count > 1)
-                    return false;
-            return true;
+            var existedArray = (int[]) list;
+
+            var standartArray = new int[existedArray.Length];
+            for (var i = 0; i < standartArray.Length; ++i)
+                standartArray[i] = i + 1;
+
+            var result = existedArray.Except(standartArray);
+            return !result.Any();
         }
 
         #endregion
-
-
+        
         private RandomList _randomList;
-        private List<int> _list;
+        private ICollection _list;
         private int _quantity;
     }
 }
