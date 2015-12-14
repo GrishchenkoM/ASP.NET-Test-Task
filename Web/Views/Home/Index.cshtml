@@ -1,0 +1,56 @@
+﻿@using Web.Helpers
+@model Web.Models.ListGenerationModel
+@{
+    ViewBag.Title = "Главная";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Context{
+    <div class="post_box pb_last">
+
+        <h2>
+            @Html.PagingNavigator((int)ViewBag.CurrentPageNum)
+            @*<a href="#">Best Collection of Freebies</a>*@
+        </h2>
+        <div class="news_meta">Posted on <a href="#">Collection</a>, 26th June 2048 | Tags: <a href="#">Photos</a>, <a href="#">Photography</a>, <a href="#">Free Stuff</a>
+        </div>
+        <div class="image_wrapper">
+
+            @CreateTable(Model.Array)
+
+        </div>
+        <p align="justify">Quisque in diam a justo condimentum molestie. Vivamus a velit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Curabitur quis velit quis tortor tincidunt aliquet. Vivamus leo velit, convallis id, ultrices sit amet, tempor a, libero. Donec diam metus, semper eu elementum at, volutpat vel risus. Curabitur condimentum porttitor libero nec hendrerit. Nullam venenatis laoreet nibh eget iaculis. Ut vel nulla vitae magna aliquam luctus. <a href="#" class="continue">Continue ...</a>
+        </p>
+        <div class="cleaner"></div>
+    </div>
+}
+
+@helper CreateTable(List<int> items)
+    {
+    <table class="my-simple-table">
+        @for (var i = 0; i < 15; ++i)
+        {
+            @WriteInCell(items, i)
+        }
+    </table>
+}
+
+@helper WriteInCell(List<int> items, int position)
+{
+    <tr>
+    @try
+    {
+        <td>@items[position]</td>
+        <td>@items[position + 25]</td>
+        <td>@items[position + 50]</td>
+        <td>@items[position + 75]</td>
+        <td>@items[position + 100]</td>
+        <td>@items[position + 125]</td>
+        <td>@items[position + 150]</td>
+        <td>@items[position + 175]</td>
+        <td>@items[position + 200]</td>
+        <td>@items[position + 225]</td>
+    }
+    catch (Exception){}
+    </tr>
+}
