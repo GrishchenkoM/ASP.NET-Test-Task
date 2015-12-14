@@ -38,7 +38,7 @@ namespace ListGenerationUnitTests
         {
             Assert.AreEqual(_quantity, _list.Count);
         }
-        [Test, MaxTime(2000), Description("Checks for uniqueness of array cells")]
+        [Test, Description("Checks for uniqueness of array cells")]
         public void IsUniqueElementsOfList()
         {
             Assert.IsTrue(IsUniqueElementsInList(_list));
@@ -50,6 +50,16 @@ namespace ListGenerationUnitTests
             var randomList2 = new RandomList(_quantity);
             Assert.AreNotEqual(_randomList,randomList1);
             Assert.AreNotEqual(randomList1, randomList2);
+        }
+        [Test, MaxTime(500), Description("Checks the speed of arrays creation")]
+        public void IsFastCreation()
+        {
+            _randomList = new RandomList(_quantity);
+        }
+        [Test, MaxTime(500), Description("Checks the speed of arrays refresh")]
+        public void IsFastRefresh()
+        {
+            _randomList.RefreshList();
         }
 
         #endregion

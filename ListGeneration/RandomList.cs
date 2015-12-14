@@ -8,7 +8,7 @@ namespace ListGeneration
     {
         public RandomList(int size)
         {
-            CreateArray(size);
+            RefreshList(size);
         }
         public ICollection GetList
         {
@@ -19,31 +19,33 @@ namespace ListGeneration
         {
             _size = size;
             _array = new int[_size];
-            
+
             // creation  of two lists:
             // - list of numbers, which are not added to the array (resulting list) yet
             // - list of indexes of array cells which are not filled yet
-            var listOfNumbers = new List<int>(_size);
-            var listOfEmptyCells = new List<int>(_size);
-
+            _listOfNumbers = new List<int>(_size);
+            _listOfEmptyCells = new List<int>(_size);
+        }
+        public void FillArray()
+        {
             for (int j = 0; j < _size; ++j)
             {
-                listOfNumbers.Add(j + 1);
-                listOfEmptyCells.Add(j);
+                _listOfNumbers.Add(j + 1);
+                _listOfEmptyCells.Add(j);
             }
 
             for (var i = 0; i < _size; ++i)
             {
                 // random choice of indexes of these lists
-                var randomElementIndex = FindRandomIndex(listOfNumbers);
-                var emptyCellIndex = FindRandomIndex(listOfEmptyCells);
+                var randomElementIndex = FindRandomIndex(_listOfNumbers);
+                var emptyCellIndex = FindRandomIndex(_listOfEmptyCells);
 
                 // filling of an array cell of a random index with a random value
-                _array[listOfEmptyCells[emptyCellIndex]] = listOfNumbers[randomElementIndex];
+                _array[_listOfEmptyCells[emptyCellIndex]] = _listOfNumbers[randomElementIndex];
 
                 // removal of the used values
-                listOfNumbers.Remove(listOfNumbers[randomElementIndex]);
-                listOfEmptyCells.Remove(listOfEmptyCells[emptyCellIndex]);
+                _listOfNumbers.Remove(_listOfNumbers[randomElementIndex]);
+                _listOfEmptyCells.Remove(_listOfEmptyCells[emptyCellIndex]);
 
                 RandomChange(ref _array);
             }
@@ -122,10 +124,15 @@ namespace ListGeneration
         public void RefreshList(int? size = null)
         {
             if (size != null)
-                _size = (int)size;
-            CreateArray(_size);
+            {
+                _size = (int) size;
+                CreateArray(_size);
+            }
+            FillArray();
         }
 
+        private List<int> _listOfNumbers;
+        private List<int> _listOfEmptyCells;
         private int[] _array;
         private int _size;
     }
