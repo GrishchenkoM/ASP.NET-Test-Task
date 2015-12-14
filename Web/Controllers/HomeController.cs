@@ -26,10 +26,11 @@ namespace Web.Controllers
                 Array = (((IEnumerable<int>)((RandomList)Session["List"]).GetList).Skip(PageSize * pageNum).Take(PageSize).ToList())
             };
             ViewBag.CurrentPageNum = pageNum;
+            ViewBag.PagesCount = (int)Math.Ceiling((double)StandartQuantity / PageSize);
             return View(model);
         }
 
         private const int StandartQuantity = 10000;
-        private const int PageSize = 250;
+        private const int PageSize = 150;
     }
 }

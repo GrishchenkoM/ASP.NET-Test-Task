@@ -211,8 +211,8 @@ a.continue { color: #F00; font-weight: bold; text-decoration: none; }
 }
 
 .post_box { clear: both; margin-bottom: 40px; }
-.post_box h2 { margin-bottom: 5px; padding-bottom: 0px; }
-.post_box h2 a { text-decoration: none; }
+.post_box h2 { margin-bottom: 5px; padding-bottom: 0px;text-align: center;}
+.post_box h2 a { text-decoration: none;color: red;}
 
 .post_box .news_meta { margin-bottom: 10px; font-size: 11px; color: #666; }
 .post_box .news_meta a { color: #666; text-decoration: underline; }

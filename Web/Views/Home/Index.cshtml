@@ -9,8 +9,7 @@
     <div class="post_box pb_last">
 
         <h2>
-            @Html.PagingNavigator((int)ViewBag.CurrentPageNum)
-            @*<a href="#">Best Collection of Freebies</a>*@
+            @Html.PagingNavigator((int)ViewBag.CurrentPageNum, (int)ViewBag.PagesCount)
         </h2>
         <div class="news_meta">Posted on <a href="#">Collection</a>, 26th June 2048 | Tags: <a href="#">Photos</a>, <a href="#">Photography</a>, <a href="#">Free Stuff</a>
         </div>
@@ -27,30 +26,26 @@
 
 @helper CreateTable(List<int> items)
     {
+    const int rowsNumber = 15;
+    const int colNumber = 10;
     <table class="my-simple-table">
-        @for (var i = 0; i < 15; ++i)
+        @for (var i = 0; i < rowsNumber; ++i)
         {
-            @WriteInCell(items, i)
+            @WriteInCell(items, i, rowsNumber, colNumber)
         }
     </table>
 }
 
-@helper WriteInCell(List<int> items, int position)
+@helper WriteInCell(List<int> items, int position, int increase, int colNumber)
 {
     <tr>
     @try
     {
-        <td>@items[position]</td>
-        <td>@items[position + 25]</td>
-        <td>@items[position + 50]</td>
-        <td>@items[position + 75]</td>
-        <td>@items[position + 100]</td>
-        <td>@items[position + 125]</td>
-        <td>@items[position + 150]</td>
-        <td>@items[position + 175]</td>
-        <td>@items[position + 200]</td>
-        <td>@items[position + 225]</td>
+        for (var i = 0; i < colNumber; ++i)
+        {
+            <td>@items[position + i * increase]</td>
+        }
     }
-    catch (Exception){}
+    catch (Exception) { }
     </tr>
 }
