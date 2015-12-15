@@ -1,0 +1,30 @@
+﻿@using Web.Helpers
+@model Web.Models.ListGenerationModel
+@{ Layout = null;}
+
+@FillTable(Model.Array)
+
+@helper FillTable(List<int> items)
+    {
+        const int rowsNumber = 15;
+        const int colNumber = 10;
+    
+        for (var i = 0; i < rowsNumber; ++i)
+        {
+            @WriteInCell(items, i, rowsNumber, colNumber)
+        }
+}
+
+@helper WriteInCell(List<int> items, int position, int increase, int colNumber)
+    {
+    <tr>
+    @try
+    {
+        for (var i = 0; i < colNumber; ++i)
+        {
+            <td>@items[position + i*increase]</td>
+        }
+    }
+    catch (Exception){}
+    </tr>
+}
