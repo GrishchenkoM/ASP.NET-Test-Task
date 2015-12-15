@@ -13,8 +13,6 @@
 
 @section Context{
 
-    <script src="../../Scripts/jquery-1.11.3.js" type="text/javascript"></script>
-    <script type="text/javascript" src="@Url.Content("~/scripts/jquery.unobtrusive-ajax.min.js")"></script>
     <div class="post_box pb_last">
         
         @using (Ajax.BeginForm(ajax))
@@ -44,7 +42,6 @@
             <script>slideToggleDiv('#content1')</script>
         }
     </div >
-
 }
 
 @helper CreateTable(List<int> items)
@@ -54,15 +51,16 @@
     <table class="my-simple-table">
         @for (var i = 0; i < rowsNumber; ++i)
         {
-            @WriteInCell(items, i, rowsNumber, colNumber)
+            <tr>
+                @WriteInCell(items, i, rowsNumber, colNumber)
+            </tr>
         }
     </table>
 }
 
 @helper WriteInCell(List<int> items, int position, int increase, int colNumber)
-    {
-    <tr>
-    @try
+{
+    try
     {
         for (var i = 0; i < colNumber; ++i)
         {
@@ -70,5 +68,4 @@
         }
     }
     catch (Exception) { }
-    </tr>
 }
