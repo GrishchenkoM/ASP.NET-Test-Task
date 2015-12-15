@@ -6,6 +6,7 @@ using NUnit.Framework;
 namespace ListGenerationUnitTests
 {
     [TestFixture]
+    [Description("Testing of correct creation of the array of random elements with various number of elements")]
     public class ListGenerationTests
     {
         #region Setup/Release
@@ -51,15 +52,22 @@ namespace ListGenerationUnitTests
             Assert.AreNotEqual(_randomList,randomList1);
             Assert.AreNotEqual(randomList1, randomList2);
         }
-        [Test, MaxTime(500), Description("Checks the speed of arrays creation")]
+
+        [Test, MaxTime(100), Description("Checks the speed of arrays creation")]
         public void IsFastCreation()
         {
             _randomList = new RandomList(_quantity);
         }
-        [Test, MaxTime(500), Description("Checks the speed of arrays refresh")]
-        public void IsFastRefresh()
+        [TestCase(100000), TestCase(1000000), Timeout(1000)]
+        public void IsFastRefreshWithNewSize(int size)
         {
-            _randomList.RefreshList();
+            _randomList.RefreshList(size);
+        }
+        [Ignore]
+        [TestCase(10000000), Timeout(8000)]
+        public void IsFastRefreshWithMaxSize(int size)
+        {
+            _randomList.RefreshList(size);
         }
 
         #endregion
