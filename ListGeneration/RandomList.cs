@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ListGeneration
 {
@@ -26,19 +28,29 @@ namespace ListGeneration
             _listOfNumbers = new List<int>(_size);
             _listOfEmptyCells = new List<int>(_size);
         }
+
         public void FillArray()
         {
-            for (int j = 0; j < _size; ++j)
-            {
-                _listOfNumbers.Add(j + 1);
-                _listOfEmptyCells.Add(j);
-            }
+            var th1 = new ParameterizedThreadStart(FillList);
+            var th2 = new ParameterizedThreadStart(FillList);
+            var listOfNumbersFillParams = new ArrayList {_listOfNumbers, 1, _locker1};
+            var listOfEmptyCellsFillParams = new ArrayList {_listOfEmptyCells, _locker2};
+
+            th1(listOfNumbersFillParams);
+            th2(listOfEmptyCellsFillParams);
 
             for (var i = 0; i < _size; ++i)
             {
-                // random choice of indexes of these lists
-                var randomElementIndex = FindRandomIndex(_listOfNumbers);
-                var emptyCellIndex = FindRandomIndex(_listOfEmptyCells);
+                _isOver = false;
+
+                var task1 = Task<int>.Factory.StartNew(Find(_listOfNumbers));
+                var task2 = Task<int>.Factory.StartNew(Find(_listOfEmptyCells));
+
+                Task.WaitAll(task1);
+                Task.WaitAll(task2);
+
+                var randomElementIndex = task1.Result;
+                var emptyCellIndex = task2.Result;
 
                 // filling of an array cell of a random index with a random value
                 _array[_listOfEmptyCells[emptyCellIndex]] = _listOfNumbers[randomElementIndex];
@@ -46,16 +58,14 @@ namespace ListGeneration
                 // removal of the used values
                 _listOfNumbers.Remove(_listOfNumbers[randomElementIndex]);
                 _listOfEmptyCells.Remove(_listOfEmptyCells[emptyCellIndex]);
-
-                RandomChange(ref _array);
             }
-            RandomChange(ref _array);
         }
-        private static int FindRandomIndex(ICollection list)
+
+        private int FindRandomIndex(ICollection list)
         {
             return ChoiceOfIndex(0, list.Count - 1);
         }
-        private static int ChoiceOfIndex(int firstIndex, int lastIndex)
+        private int ChoiceOfIndex(int firstIndex, int lastIndex)
         {
             // variables which define part of the list 
             // from which required data will be taken
@@ -71,8 +81,8 @@ namespace ListGeneration
 
             while (leftPart == rightPart)
             {
-                leftPart = random.Next(10000);
-                rightPart = random.Next(10000);
+                leftPart = random.Next(_size);
+                rightPart = random.Next(_size);
             }
 
             if (leftPart > rightPart)
@@ -84,41 +94,43 @@ namespace ListGeneration
         /// Improves randomness of arrangement of elements in the array
         /// </summary>
         /// <param name="array">The array which elements need to be reshuffled</param>
-        private static void RandomChange(ref int[] array)
+        private void RandomChange()
         {
             int random1, eachElementOfNumber;
             var  random2 = random1 = 0;
 
-            // Random variables creation
-            var startPoint = DateTime.Now.Millisecond;
-            var random = new Random(startPoint);
-
-            while (random1 == random2 || random1 == 0 || random2 == 0)
+            while (!_isOver)
             {
-                random1 = random.Next(100);
-                random2 = random.Next(100);
-            }
-            
-            if (random1 > random2) 
-                eachElementOfNumber = random1 / random2 + 1;
-            else 
-                eachElementOfNumber = random2 / random1 + 1;
+                // Random variables creation
+                var startPoint = DateTime.Now.Millisecond;
+                var random = new Random(startPoint);
 
-            // Each element of 'eachElementOfNumber'th cell will be changed 
-            // with element of 'i - eachElementOfNumber' th cell
-            // number 'koef' - random number, but it has to be not less then 2, 
-            // otherwise there will be OutOfRangeException
-            const int koef = 3;
-            for (var i = eachElementOfNumber * koef; i < array.Length; i++)
-            {
-                if (i % eachElementOfNumber == 0
-                    && array[i] != 0
-                    && array[i - eachElementOfNumber] != 0)
+                while (random1 == random2 || random1 == 0 || random2 == 0)
                 {
-                    var temp = array[i - eachElementOfNumber];
-                    array[i - eachElementOfNumber] = array[i];
-                    array[i] = temp;
+                    random1 = random.Next(_size);
+                    random2 = random.Next(_size);
                 }
+
+                if (random1 > random2)
+                    eachElementOfNumber = random1/random2 + 1;
+                else
+                    eachElementOfNumber = random2/random1 + 1;
+
+                // Each element of 'eachElementOfNumber'th cell will be changed 
+                // with element of 'i - eachElementOfNumber' th cell
+                try
+                {
+                    for (var i = eachElementOfNumber; i + eachElementOfNumber < _array.Length; i++)
+                        if (i % eachElementOfNumber == 0
+                                && _array[i] != 0
+                                && _array[i + eachElementOfNumber] != 0)
+                        {
+                            var temp = _array[i + eachElementOfNumber];
+                            _array[i + eachElementOfNumber] = _array[i];
+                            _array[i] = temp;
+                        }
+                }
+                catch (Exception) { }
             }
         }
         public void RefreshList(int? size = null)
@@ -128,12 +140,44 @@ namespace ListGeneration
                 _size = (int) size;
                 CreateArray(_size);
             }
-            FillArray();
+            Parallel.Invoke(FillArray, RandomChange);
+        }
+
+        private void FillList(object parameters)
+        {
+            var arrayList = parameters as ArrayList;
+            List<int> list = null;
+            int firstIndex = 0;
+            object locker = null;
+
+            foreach (var item in arrayList)
+            {
+                if (item is List<int>)
+                    list = item as List<int>;
+                if (item is int)
+                    firstIndex = (int)(item as int?);
+                if (!(item is List<int>) && !(item is int))
+                    locker = item;
+            }
+
+            lock (locker)
+                if (list != null)
+                    for (int j = (int)firstIndex; j < _size + firstIndex; ++j)
+                        list.Add(j);
+        }
+
+        private Func<int> Find(List<int> list)
+        {
+            var result = FindRandomIndex(list);
+            return (() => result);
         }
 
         private List<int> _listOfNumbers;
         private List<int> _listOfEmptyCells;
         private int[] _array;
         private int _size;
+        private static object _locker1 = new object();
+        private static object _locker2 = new object();
+        private static bool _isOver;
     }
 }
