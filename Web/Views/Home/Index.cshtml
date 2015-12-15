@@ -3,31 +3,54 @@
 @{
     ViewBag.Title = "Главная";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var ajax = new AjaxOptions
+    {
+        UpdateTargetId = "numberList",
+        Url = Url.Action("GetContent", "Home"),
+        LoadingElementId = "loadingElement"
+    };
 }
 
 @section Context{
+
+    <script src="../../Scripts/jquery-1.11.3.js" type="text/javascript"></script>
+    <script type="text/javascript" src="@Url.Content("~/scripts/jquery.unobtrusive-ajax.min.js")"></script>
     <div class="post_box pb_last">
+        
+        @using (Ajax.BeginForm(ajax))
+        {
+            <h2>
+                @*@Ajax.AjaxPagingNavigator((int) ViewBag.CurrentPageNum, (int) ViewBag.PagesCount)*@
+                @Html.PagingNavigator((int)ViewBag.CurrentPageNum, (int)ViewBag.PagesCount)
+            </h2>
+            <div class="search-button">
+                <input type="submit" value="Refresh" onclick="slideToggleDiv('#content1',1000)"/>
+            </div>
+            @*<div class="image_wrapper">*@
+                <div id="content1">
+                    <div class="image_wrapper">
+                        <table class="my-simple-table" id="numberList">
+                            @*@Html.Action("GetContent", new {pageNum = ViewBag.CurrentPage})*@
+                            @{ Html.RenderPartial("IndexContent", Model); }
+                        </table>
+                        <div id="loadingElement" style="display: none; color: red">
+                            <p>LOADING...</p>
+                        </div>
+                    </div>
+                    <div class="cleaner"></div>
+                </div>
+            @*</div>*@
+            <div class="cleaner"></div>
+            <script>slideToggleDiv('#content1')</script>
+        }
+    </div >
 
-        <h2>
-            @Html.PagingNavigator((int)ViewBag.CurrentPageNum, (int)ViewBag.PagesCount)
-        </h2>
-        <div class="news_meta">Posted on <a href="#">Collection</a>, 26th June 2048 | Tags: <a href="#">Photos</a>, <a href="#">Photography</a>, <a href="#">Free Stuff</a>
-        </div>
-        <div class="image_wrapper">
-
-            @CreateTable(Model.Array)
-
-        </div>
-        <p align="justify">Quisque in diam a justo condimentum molestie. Vivamus a velit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Curabitur quis velit quis tortor tincidunt aliquet. Vivamus leo velit, convallis id, ultrices sit amet, tempor a, libero. Donec diam metus, semper eu elementum at, volutpat vel risus. Curabitur condimentum porttitor libero nec hendrerit. Nullam venenatis laoreet nibh eget iaculis. Ut vel nulla vitae magna aliquam luctus. <a href="#" class="continue">Continue ...</a>
-        </p>
-        <div class="cleaner"></div>
-    </div>
 }
 
 @helper CreateTable(List<int> items)
     {
-    const int rowsNumber = 15;
-    const int colNumber = 10;
+        const int rowsNumber = 15;
+        const int colNumber = 10;
     <table class="my-simple-table">
         @for (var i = 0; i < rowsNumber; ++i)
         {
@@ -37,7 +60,7 @@
 }
 
 @helper WriteInCell(List<int> items, int position, int increase, int colNumber)
-{
+    {
     <tr>
     @try
     {
