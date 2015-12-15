@@ -47,10 +47,11 @@ namespace Web.Helpers
         public static MvcHtmlString AjaxPagingNavigator(this AjaxHelper helper, int pageNum, int pagesCount)
         {
             var sb = new StringBuilder();
-            AjaxOptions options = new AjaxOptions();
-            options.UpdateTargetId = "numberList";
-            options.Confirm = "Are you crazy?";
-            
+            var options = new AjaxOptions
+            {
+                UpdateTargetId = "numberList"
+            };
+
             if (pageNum < 0)
                 pageNum = 0;
 
