@@ -200,9 +200,10 @@ a.continue { color: #F00; font-weight: bold; text-decoration: none; }
 /* content */
 
 #templatemo_main {
-	width: 920px;
+	width: 930px;
 	padding: 40px;
 	background: #fff;
+    height: 700px;
 }
 
 #templatemo_content {
