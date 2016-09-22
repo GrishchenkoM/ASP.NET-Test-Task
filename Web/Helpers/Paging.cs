@@ -1,95 +1,66 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Web.Mvc;
-using System.Web.Mvc.Ajax;
-using System.Web.Mvc.Html;
+using Web.Models;
 
 namespace Web.Helpers
 {
     public static class Paging
     {
-        public static MvcHtmlString PagingNavigator(this HtmlHelper helper, int pageNum, int pagesCount)
+        public static MvcHtmlString PageLinks(this HtmlHelper html,
+            PageInfo pageInfo, Func<int, string> pageUrl)
         {
-            var sb = new StringBuilder();
-            
-            if (pageNum < 0)
-                pageNum = 0;
+            StringBuilder result = new StringBuilder();
+            try
+            {
+                if (pageInfo.PageNumber >= 1)
+                    if (pageInfo.PageNumber > 1)
+                    {
+                        CreateTag("onclick", "UpdateContent(" + (pageInfo.PageNumber - 1) + ")", "<< Prev", pageInfo, result);
+                        
+                        result.Append("  .  ");
 
-            if (pageNum >= 0)
-                if (pageNum > 0)
+                        CreateTag("onclick", "UpdateContent(" + 1 + ")", "1", pageInfo, result);
+                        
+                        AddCurrentPage(result, pageInfo.PageNumber, pageInfo.TotalPages);
+                    }
+                    else
+                    {
+                        result.Append("\"1\"");
+                        result.Append(" ...  ");
+                    }
+
+                if (pageInfo.PageNumber < pageInfo.TotalPages)
                 {
-                    sb.Append(helper.ActionLink("<< Prev", "Index", new { pageNum = pageNum - 1 }));
-                    sb.Append("  .  ");
-                    sb.Append(helper.ActionLink("1", "Index", new { pageNum = 0 }));
+                    CreateTag("onclick", "UpdateContent(" + pageInfo.TotalPages + ")", pageInfo.TotalPages.ToString(), pageInfo, result);
 
-                    AddCurrentPage(sb, pageNum, pagesCount - 1);
+                    result.Append("  .  ");
+
+                    CreateTag("onclick", "UpdateContent(" + (pageInfo.PageNumber + 1) + ")", "Next >>", pageInfo, result);
                 }
                 else
                 {
-                    sb.Append("1");
-                    sb.Append(" ...  ");
+                    result.Append(pageInfo.TotalPages.ToString());
                 }
-
-                if (pageNum < pagesCount - 1)
-                {
-                    sb.Append(helper.ActionLink(pagesCount.ToString(), "Index", new { pageNum = pagesCount - 1 }));
-                    sb.Append("  .  ");
-                    sb.Append(helper.ActionLink("Next >>", "Index", new { pageNum = pageNum + 1 }));
-                }
-                else
-                {
-                    sb.Append(pagesCount.ToString());
-                }
-            
-            return MvcHtmlString.Create(sb.ToString());
+            }
+            catch { }
+            return MvcHtmlString.Create(result.ToString());
         }
 
-        // Was created for Ajax realization. Not working
-        public static MvcHtmlString AjaxPagingNavigator(this AjaxHelper helper, int pageNum, int pagesCount)
+        private static void CreateTag(string key, string value, string innerHtml, PageInfo pageInfo, StringBuilder result)
         {
-            var sb = new StringBuilder();
-            var options = new AjaxOptions
-            {
-                UpdateTargetId = "numberList"
-            };
-
-            if (pageNum < 0)
-                pageNum = 0;
-
-            if (pageNum >= 0)
-                if (pageNum > 0)
-                {
-                    sb.Append(helper.ActionLink("<< Prev", "GetContent", new { pageNum = pageNum - 1 }, options));
-                    sb.Append("  .  ");
-                    sb.Append(helper.ActionLink("1", "GetContent", new { pageNum = 0 }, options));
-
-                    AddCurrentPage(sb, pageNum, pagesCount - 1);
-                }
-                else
-                {
-                    sb.Append("\"1\"");
-                    sb.Append(" ...  ");
-                }
-
-            if (pageNum < pagesCount - 1)
-            {
-                sb.Append(helper.ActionLink(pagesCount.ToString(), "GetContent", new { pageNum = pagesCount - 1 }, options));
-                sb.Append("  .  ");
-                sb.Append(helper.ActionLink("Next >>", "GetContent", new { pageNum = pageNum + 1 }, options));
-            }
-            else
-            {
-                sb.Append(pagesCount.ToString());
-            }
-
-            return MvcHtmlString.Create(sb.ToString());
+            var tag = new TagBuilder("a");
+            tag.MergeAttribute(key, value);
+            tag.InnerHtml = innerHtml;
+            result.Append(tag);
         }
 
         private static void AddCurrentPage(StringBuilder sb, int pageNum, int lastPage)
         {
-            if (pageNum != 0 && pageNum != lastPage)
+            if (pageNum != 1 && pageNum != lastPage)
             {
                 sb.Append("  ... ");
-                sb.Append("\"" + (pageNum + 1) + "\"");
+                sb.Append("\"" + (pageNum) + "\"");
                 sb.Append(" ...  ");
             }
             else

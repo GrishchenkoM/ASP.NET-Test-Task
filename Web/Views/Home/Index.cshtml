@@ -1,11 +1,10 @@
 ﻿@using Web.Helpers
-@model Web.Models.ListGenerationModel
 @{
     ViewBag.Title = "Главная";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var ajax = new AjaxOptions
     {
-        UpdateTargetId = "numberList",
+        UpdateTargetId = "content1",
         Url = Url.Action("GetContent", "Home"),
         LoadingElementId = "loadingElement"
     };
@@ -17,55 +16,42 @@
         
         @using (Ajax.BeginForm(ajax))
         {
-            <h2>
-                @*@Ajax.AjaxPagingNavigator((int) ViewBag.CurrentPageNum, (int) ViewBag.PagesCount)*@
-                @Html.PagingNavigator((int)ViewBag.CurrentPageNum, (int)ViewBag.PagesCount)
-            </h2>
-            <div class="search-button">
-                <input type="submit" value="Refresh" onclick="slideToggleDiv('#content1',1000)"/>
+            <div id="content1">
+                @Html.Action("GetContent", new {pageNum = ViewBag.CurrentPage})
             </div>
-            @*<div class="image_wrapper">*@
-                <div id="content1">
-                    <div class="image_wrapper">
-                        <table class="my-simple-table" id="numberList">
-                            @*@Html.Action("GetContent", new {pageNum = ViewBag.CurrentPage})*@
-                            @{ Html.RenderPartial("IndexContent", Model); }
-                        </table>
-                        <div id="loadingElement" style="display: none; color: red">
-                            <p>LOADING...</p>
-                        </div>
-                    </div>
-                    <div class="cleaner"></div>
-                </div>
-            @*</div>*@
             <div class="cleaner"></div>
             <script>slideToggleDiv('#content1')</script>
         }
     </div >
 }
 
-@helper CreateTable(List<int> items)
-    {
-        const int rowsNumber = 15;
-        const int colNumber = 10;
-    <table class="my-simple-table">
-        @for (var i = 0; i < rowsNumber; ++i)
-        {
-            <tr>
-                @WriteInCell(items, i, rowsNumber, colNumber)
-            </tr>
-        }
-    </table>
-}
+<script>
+    function UpdateContent(page) {
+        $(function () {
 
-@helper WriteInCell(List<int> items, int position, int increase, int colNumber)
-{
-    try
-    {
-        for (var i = 0; i < colNumber; ++i)
-        {
-            <td>@items[position + i * increase]</td>
-        }
+            var pageNumber;
+            if (page == null) {
+                pageNumber = $(".btn-primary").html();
+            } else {
+                pageNumber = page;
+            }
+
+            var viewModel = {
+                pageNum: pageNumber
+            }
+            $.ajax({
+                url: '@Url.Action("GetContent")',
+                data: viewModel,
+                success: function (data) {
+                    $('#content1').html(data);
+                }
+            });
+        });
     }
-    catch (Exception) { }
-}
+
+    function Refresh() {
+        slideToggleDiv('#content1', 500);
+        UpdateContent(1);
+    }
+</script>
+

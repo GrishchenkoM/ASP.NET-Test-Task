@@ -91,3 +91,7 @@ textarea {
 #content1 {
     display: none;
 }
+
+h2 {
+    cursor: pointer;
+}

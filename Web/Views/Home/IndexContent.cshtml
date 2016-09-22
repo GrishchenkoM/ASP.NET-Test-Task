@@ -1,30 +1,57 @@
 ﻿@using Web.Helpers
-@model Web.Models.ListGenerationModel
+@model Web.Models.ViewModel
 @{ Layout = null;}
 
-@FillTable(Model.Array)
 
-@helper FillTable(List<int> items)
+<h2>
+    @if (Model != null)
+    {
+        <div class="btn-group">
+            @Html.PageLinks(Model.PageInfo, x => Url.Action("GetContent", "Home", new {page = x}))
+        </div>
+    }
+</h2>
+
+<div class="search-button">
+    <input type="submit" value="Refresh" onclick="Refresh()"/>
+</div>
+
+<div>
+    <div class="image_wrapper">
+        <table class="my-simple-table" id="numberList">
+            @CreateTable(Model.Array)
+        </table>
+        <div id="loadingElement" style="display: none; color: red">
+            <p>LOADING...</p>
+        </div>
+    </div>
+    <div class="cleaner"></div>
+</div>
+             
+
+
+@helper CreateTable(List<int> items)
     {
         const int rowsNumber = 15;
         const int colNumber = 10;
-    
-        for (var i = 0; i < rowsNumber; ++i)
+    <table class="my-simple-table">
+        @for (var i = 0; i < rowsNumber; ++i)
         {
-            @WriteInCell(items, i, rowsNumber, colNumber)
+            <tr>
+                @WriteInCell(items, i, rowsNumber, colNumber)
+            </tr>
         }
+    </table>
 }
 
 @helper WriteInCell(List<int> items, int position, int increase, int colNumber)
-    {
-    <tr>
-    @try
+{
+    try
     {
         for (var i = 0; i < colNumber; ++i)
         {
-            <td>@items[position + i*increase]</td>
+            <td>@items[position + i * increase]</td>
         }
     }
-    catch (Exception){}
-    </tr>
+    catch (Exception) { }
 }

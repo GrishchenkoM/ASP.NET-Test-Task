@@ -9,43 +9,24 @@ namespace Web.Controllers
 {
     public class HomeController : Controller
     {
-        public ActionResult Index(int pageNum = 0)
+        [HttpGet]
+        public ActionResult Index()
         {
             if (Session["List"] == null)
                 Session["List"] = new RandomList(StandartQuantity);
-
-            if (pageNum < 0)
-                pageNum = 0;
-
-            var model = new ListGenerationModel();
-            FillModel(model, pageNum);
-
-            ViewBag.CurrentPageNum = pageNum;
-            ViewBag.PagesCount = (int)Math.Ceiling((double)StandartQuantity / PageSize);
-
-            // Was created for Ajax realization. Not working
-            if (Request.IsAjaxRequest())
-                return PartialView("IndexContent", model);
             
-            return View(model);
+            return View();
         }
 
         [HttpPost]
-        public ActionResult Index()
+        public ActionResult Index(int pageNum = 1)
         {
             Session["List"] = new RandomList(StandartQuantity);
-
-            var model = new ListGenerationModel();
-            FillModel(model);
-
-            ViewBag.CurrentPageNum = 0;
-            ViewBag.PagesCount = (int) Math.Ceiling((double) StandartQuantity/PageSize);
             
-            return View(model);
+            return View();
         }
 
-        // Was created for Ajax realization. Not working
-        public ActionResult GetContent(int pageNum = 0)
+        public ActionResult GetContent(int pageNum = 1)
         {
             if (Session["List"] == null)
                 Session["List"] = new RandomList(StandartQuantity);
@@ -53,21 +34,28 @@ namespace Web.Controllers
             if (pageNum < 0)
                 pageNum = 0;
 
-            var model = new ListGenerationModel();
+            var model = new ViewModel();
             FillModel(model, pageNum);
 
             ViewBag.CurrentPageNum = pageNum;
             ViewBag.PagesCount = (int)Math.Ceiling((double)StandartQuantity / PageSize);
+
+            try
+            {
+                var itemsPerPages = model.Array.Skip((pageNum - 1) * PageSize).Take(PageSize);
+                var pageInfo = new PageInfo { PageNumber = pageNum, PageSize = PageSize, TotalItems = model.Array.Count() };
+                model.PageInfo = pageInfo;
+                model.Array = itemsPerPages.ToList();
+            }
+            catch { }
+
             return View("IndexContent", model);
         }
 
-        private void FillModel(ListGenerationModel model, int pageNum = 0)
+        private void FillModel(ViewModel model, int pageNum = 0)
         {
             model.Array =
-                (((IEnumerable<int>) ((RandomList) Session["List"]).GetList)
-                    .Skip(PageSize*pageNum)
-                    .Take(PageSize)
-                    .ToList());
+                (((IEnumerable<int>) ((RandomList) Session["List"]).GetList)).ToList();
         }
 
         private const int StandartQuantity = 10000;
